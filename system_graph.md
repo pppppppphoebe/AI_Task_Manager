@@ -8,23 +8,28 @@
 這張圖展示了使用者如何透過前端與後端互動，以及後端如何連結資料庫與 AI 引擎。
 
 ```mermaid
-graph TD
-    User((使用者)) -->|操作介面| React[React 前端 - Tailwind v4]
-    
-    subgraph "前端 Frontend (Vite)"
-        React -->|操作| Axios[Axios API Client]
-        React -->|顯示| ChartJS[Chart.js / Dashboard]
-    end
+flowchart TB
+ subgraph subGraph0["前端 Frontend (Vite)"]
+        Axios["Axios API Client"]
+        React["React 前端 - Tailwind v4"]
+        ChartJS["Chart.js / Dashboard"]
+  end
+ subgraph subGraph1["後端 Backend (Python)"]
+        SQLAlchemy["SQLAlchemy"]
+        FastAPI["FastAPI 後端"]
+        AIService["AI Service - DeepSeek"]
+  end
+    User(("使用者")) -- 操作介面 --> React
+    React -- 操作:新增,刪除,查詢,PROMPT(AI) --> Axios
+    React -- 顯示 --> ChartJS
+    Axios -- REST API --> FastAPI
+    FastAPI <-- ORM --> SQLAlchemy
+    FastAPI <-- AI 處理 --> AIService
+    SQLAlchemy <-- 存取資料 --> Postgres[("PostgreSQL 資料庫")]
+    AIService <-- 自然語言解析 --> DeepSeek["DeepSeek API"]
 
-    Axios -->|REST API| FastAPI[FastAPI 後端]
-
-    subgraph "後端 Backend (Python)"
-        FastAPI -->|ORM| SQLAlchemy[SQLAlchemy]
-        FastAPI -->|AI 處理| AIService[AI Service - DeepSeek]
-    end
-
-    SQLAlchemy -->|存取資料| Postgres[(PostgreSQL 資料庫)]
-    AIService -->|自然語言解析| DeepSeek[DeepSeek API]
+    style subGraph0 fill:#FFF9C4
+    style subGraph1 fill:#C8E6C9
 ```
 
 ---
@@ -45,6 +50,7 @@ erDiagram
         enum priority "優先級 (High, Medium, Low)"
         enum status "狀態 (Todo, InProgress, Done)"
         int workload "預估工時 (小時)"
+        bool is_daily "是否每日任務"
         datetime created_at "建立時間"
     }
 ```
