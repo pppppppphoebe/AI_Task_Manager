@@ -10,6 +10,7 @@ class TaskBase(BaseModel):
     priority: Priority = Priority.MEDIUM
     status: Status = Status.TODO
     workload: int = 1
+    is_daily: bool = False
 
 class TaskCreate(TaskBase):
     pass
@@ -21,6 +22,7 @@ class TaskUpdate(BaseModel):
     priority: Optional[Priority] = None
     status: Optional[Status] = None
     workload: Optional[int] = None
+    is_daily: Optional[bool] = None
 
 class TaskSchema(TaskBase):
     id: int
@@ -35,3 +37,4 @@ class AIParsedTask(BaseModel):
     deadline: Optional[datetime] = None
     priority: Priority = Priority.MEDIUM
     workload: int = 1
+    is_daily: bool = False

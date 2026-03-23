@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { type Task, type TaskCreate, Status, Priority } from './types';
+import { type Task, type TaskCreate } from './types';
 import { getTasks, createTask, updateTask, deleteTask, getAISortedTasks, getAISummary } from './api';
 import TaskCard from './components/TaskCard';
 import TaskForm from './components/TaskForm';
@@ -64,8 +64,12 @@ const App: React.FC = () => {
             const sortedTasks = [...tasks].sort((a, b) => {
                 const indexA = sortedIds.indexOf(a.id);
                 const indexB = sortedIds.indexOf(b.id);
+                
+                // If ID is missing from AI response, put it at the end
+                if (indexA === -1 && indexB === -1) return 0;
                 if (indexA === -1) return 1;
                 if (indexB === -1) return -1;
+                
                 return indexA - indexB;
             });
             setTasks(sortedTasks);
@@ -91,63 +95,68 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#121212] text-white w-full">
-            <header className="bg-[#1e1e1e] border-b border-[#333] p-4 flex justify-between items-center sticky top-0 z-10">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 w-full font-sans">
+            <header className="bg-white border-b border-slate-200 p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
                 <div className="flex items-center gap-2">
-                    <CheckSquare className="w-8 h-8 text-blue-500" />
-                    <h1 className="text-2xl font-bold tracking-tight">TASK MANAGER</h1>
+                    <div className="bg-blue-600 p-1.5 rounded-lg">
+                        <CheckSquare className="w-6 h-6 text-white" />
+                    </div>
+                    <h1 className="text-xl font-bold tracking-tight text-slate-800">TaskFlow AI</h1>
                 </div>
-                <nav className="flex gap-4">
+                <nav className="flex gap-2">
                     <button 
                         onClick={() => setView('tasks')}
-                        className={`flex items-center gap-1 px-4 py-2 rounded transition-colors ${view === 'tasks' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'tasks' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                         <Layout className="w-4 h-4" /> Tasks
                     </button>
                     <button 
                         onClick={() => setView('dashboard')}
-                        className={`flex items-center gap-1 px-4 py-2 rounded transition-colors ${view === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                         <BarChart3 className="w-4 h-4" /> Dashboard
                     </button>
                     <button 
                         onClick={handleFetchAiSummary}
                         disabled={isAiLoading}
-                        className={`flex items-center gap-1 px-4 py-2 rounded transition-colors ${view === 'ai' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'ai' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
-                        {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />} AI Insights
+                        {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin text-blue-600" /> : <Sparkles className="w-4 h-4 text-blue-500" />} AI Insights
                     </button>
                 </nav>
             </header>
 
-            <main className="max-w-6xl mx-auto p-4 md:p-8">
+            <main className="max-w-6xl mx-auto p-6 md:p-10">
                 {view === 'tasks' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-1">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                        <div className="lg:col-span-4">
                             <TaskForm onTaskCreated={handleCreateTask} />
                         </div>
-                        <div className="lg:col-span-2">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-bold">Your Tasks</h2>
+                        <div className="lg:col-span-8">
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-2xl font-bold text-slate-800">Your Tasks</h2>
                                 <div className="flex gap-2">
                                     <button 
                                         onClick={handleAiSort}
                                         disabled={isAiLoading}
-                                        className="flex items-center gap-2 bg-[#1e1e1e] border border-[#333] px-4 py-2 rounded hover:border-blue-500 transition-colors text-sm"
+                                        className="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-lg hover:border-blue-400 hover:text-blue-600 transition-all text-sm font-medium shadow-sm"
                                     >
-                                        {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-blue-400" />}
+                                        {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-blue-500" />}
                                         AI Priority Sort
                                     </button>
                                 </div>
                             </div>
 
                             {isLoading ? (
-                                <div className="flex justify-center py-12">
-                                    <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
+                                <div className="flex justify-center py-20">
+                                    <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
                                 </div>
                             ) : tasks.length === 0 ? (
-                                <div className="text-center py-12 bg-[#1e1e1e] rounded-lg border border-dashed border-[#333]">
-                                    <p className="text-gray-500">No tasks found. Use the AI input or form to add some!</p>
+                                <div className="text-center py-20 bg-white rounded-xl border-2 border-dashed border-slate-200">
+                                    <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Filter className="w-8 h-8 text-slate-300" />
+                                    </div>
+                                    <p className="text-slate-500 font-medium">No tasks found. Use the AI input to get started!</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-4">
@@ -170,23 +179,28 @@ const App: React.FC = () => {
                 )}
 
                 {view === 'ai' && (
-                    <div className="bg-[#1e1e1e] p-8 rounded-lg border border-blue-900 shadow-lg shadow-blue-900/10">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Sparkles className="w-8 h-8 text-blue-400" />
-                            <h2 className="text-3xl font-bold">AI Weekly Insights</h2>
+                    <div className="bg-white p-10 rounded-2xl border border-slate-100 shadow-xl shadow-blue-500/5">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="bg-blue-100 p-3 rounded-2xl">
+                                <Sparkles className="w-8 h-8 text-blue-600" />
+                            </div>
+                            <h2 className="text-3xl font-bold text-slate-800">AI Weekly Insights</h2>
                         </div>
-                        <div className="prose prose-invert max-w-none">
+                        <div className="prose prose-slate max-w-none">
                             {aiSummary ? (
-                                <div className="whitespace-pre-wrap leading-relaxed text-gray-300 bg-[#121212] p-6 rounded border border-[#333]">
+                                <div className="whitespace-pre-wrap leading-relaxed text-slate-600 bg-slate-50 p-8 rounded-2xl border border-slate-100 italic">
                                     {aiSummary}
                                 </div>
                             ) : (
-                                <p className="text-gray-500">Generating insights...</p>
+                                <div className="flex items-center gap-3 text-slate-400">
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Generating insights...
+                                </div>
                             )}
                         </div>
                         <button 
                             onClick={() => setView('tasks')}
-                            className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-bold transition-colors"
+                            className="mt-10 bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg"
                         >
                             Back to Tasks
                         </button>

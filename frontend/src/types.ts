@@ -1,14 +1,16 @@
-export enum Priority {
-    HIGH = "High",
-    MEDIUM = "Medium",
-    LOW = "Low"
-}
+export const Priority = {
+    HIGH: "High",
+    MEDIUM: "Medium",
+    LOW: "Low"
+} as const;
+export type Priority = typeof Priority[keyof typeof Priority];
 
-export enum Status {
-    TODO = "Todo",
-    IN_PROGRESS = "InProgress",
-    DONE = "Done"
-}
+export const Status = {
+    TODO: "Todo",
+    IN_PROGRESS: "InProgress",
+    DONE: "Done"
+} as const;
+export type Status = typeof Status[keyof typeof Status];
 
 export interface Task {
     id: number;

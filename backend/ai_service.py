@@ -26,12 +26,18 @@ def parse_task_from_text(text: str) -> AIParsedTask:
         prompt = f"""
         Current time: {now}
         Parse the following user input into a JSON object representing a task: "{text}"
+        
+        CRITICAL RULES:
+        1. title: MUST be a short, concise summary (LESS THAN 8 WORDS).
+        2. description: Put ALL other details, context, and the full original intent here.
+        
         The JSON should have:
-        - title: (string)
-        - description: (string or null)
+        - title: (string, < 8 words)
+        - description: (string or null, contains extra details)
         - deadline: (ISO format datetime string or null)
         - priority: (One of: High, Medium, Low)
         - workload: (estimated hours as integer, default to 1)
+        - is_daily: (boolean, true if the task should be repeated every day until the deadline, false otherwise)
 
         Output ONLY the JSON object.
         """

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLEnum, Boolean
 import enum
 from database import Base
 import datetime
@@ -23,4 +23,5 @@ class Task(Base):
     priority = Column(SQLEnum(Priority), default=Priority.MEDIUM)
     status = Column(SQLEnum(Status), default=Status.TODO)
     workload = Column(Integer, default=1) # estimated hours
+    is_daily = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

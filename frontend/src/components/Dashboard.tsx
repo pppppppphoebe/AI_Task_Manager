@@ -23,16 +23,12 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks }) => {
                 label: '# of Tasks',
                 data: [statusCounts[Status.TODO], statusCounts[Status.IN_PROGRESS], statusCounts[Status.DONE]],
                 backgroundColor: [
-                    'rgba(156, 163, 175, 0.8)',
-                    'rgba(234, 179, 8, 0.8)',
-                    'rgba(34, 197, 94, 0.8)',
+                    '#cbd5e1', // slate-300
+                    '#fbbf24', // amber-400
+                    '#10b981', // emerald-500
                 ],
-                borderColor: [
-                    'rgba(156, 163, 175, 1)',
-                    'rgba(234, 179, 8, 1)',
-                    'rgba(34, 197, 94, 1)',
-                ],
-                borderWidth: 1,
+                borderWidth: 0,
+                hoverOffset: 10
             },
         ],
     };
@@ -48,23 +44,59 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks }) => {
                     tasks.filter(t => t.priority === 'Medium').reduce((acc, t) => acc + t.workload, 0),
                     tasks.filter(t => t.priority === 'High').reduce((acc, t) => acc + t.workload, 0),
                 ],
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                backgroundColor: '#3b82f6', // blue-500
+                borderRadius: 8,
+                barThickness: 40,
             },
         ],
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-[#1e1e1e] p-6 rounded-lg border border-[#333]">
-                <h3 className="text-lg font-bold mb-4 text-white">Task Status Distribution</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold mb-6 text-slate-800">Task Status Distribution</h3>
                 <div className="h-64 flex justify-center">
-                    <Doughnut data={doughnutData} options={{ maintainAspectRatio: false }} />
+                    <Doughnut 
+                        data={doughnutData} 
+                        options={{ 
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true,
+                                        font: { size: 12, weight: 'bold' }
+                                    }
+                                }
+                            }
+                        }} 
+                    />
                 </div>
             </div>
-            <div className="bg-[#1e1e1e] p-6 rounded-lg border border-[#333]">
-                <h3 className="text-lg font-bold mb-4 text-white">Workload by Priority</h3>
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold mb-6 text-slate-800">Workload by Priority</h3>
                 <div className="h-64 flex justify-center">
-                    <Bar data={workloadData} options={{ maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
+                    <Bar 
+                        data={workloadData} 
+                        options={{ 
+                            maintainAspectRatio: false, 
+                            plugins: { 
+                                legend: { display: false } 
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    grid: { display: false },
+                                    ticks: { font: { size: 11 } }
+                                },
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { font: { size: 11, weight: 'bold' } }
+                                }
+                            }
+                        }} 
+                    />
                 </div>
             </div>
         </div>
