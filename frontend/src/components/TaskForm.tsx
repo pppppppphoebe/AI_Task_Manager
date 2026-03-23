@@ -13,6 +13,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
     const [priority, setPriority] = useState<Priority>(Priority.MEDIUM);
     const [workload, setWorkload] = useState(1);
     const [deadline, setDeadline] = useState('');
+    const [isDaily, setIsDaily] = useState(false);
     
     const [aiInput, setAiInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             priority,
             workload,
             deadline: deadline || undefined,
-            status: Status.TODO
+            status: Status.TODO,
+            is_daily: isDaily
         });
         resetForm();
     };
@@ -36,6 +38,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
         setPriority(Priority.MEDIUM);
         setWorkload(1);
         setDeadline('');
+        setIsDaily(false);
     };
 
     const handleAiParse = async () => {
@@ -47,6 +50,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             setDescription(data.description || '');
             setPriority(data.priority);
             setWorkload(data.workload);
+            setIsDaily(data.is_daily || false);
             if (data.deadline) {
                 setDeadline(new Date(data.deadline).toISOString().slice(0, 16));
             }
@@ -75,7 +79,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
                         type="text" 
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
-                        placeholder="e.g., 'Finish project report by Friday noon with high priority'"
+                        placeholder="e.g., 'Finish project report by Friday noon with high priority' or 'Write leetcode every day until 4/10'"
                         className="flex-1 bg-[#121212] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                         onKeyPress={(e) => e.key === 'Enter' && handleAiParse()}
                     />
@@ -139,6 +143,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
                         onChange={(e) => setWorkload(parseInt(e.target.value))}
                         className="w-full bg-[#121212] border border-[#333] rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
                     />
+                </div>
+                <div className="flex items-center mt-6">
+                    <label className="flex items-center text-gray-400 text-sm cursor-pointer hover:text-white transition-colors">
+                        <input 
+                            type="checkbox" 
+                            checked={isDaily}
+                            onChange={(e) => setIsDaily(e.target.checked)}
+                            className="mr-2 w-4 h-4 text-blue-600 bg-[#121212] border-[#333] rounded focus:ring-blue-500"
+                        />
+                        Repeat Daily until Deadline
+                    </label>
                 </div>
                 <div className="md:col-span-2 flex justify-end gap-2 mt-2">
                     <button 

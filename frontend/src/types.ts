@@ -18,6 +18,7 @@ export interface Task {
     priority: Priority;
     status: Status;
     workload: number;
+    is_daily: boolean;
     created_at: string;
 }
 
@@ -28,4 +29,5 @@ export interface TaskCreate {
     priority: Priority;
     status: Status;
     workload: number;
+    is_daily?: boolean;
 }

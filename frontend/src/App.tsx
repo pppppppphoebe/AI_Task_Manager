@@ -95,7 +95,7 @@ const App: React.FC = () => {
             <header className="bg-[#1e1e1e] border-b border-[#333] p-4 flex justify-between items-center sticky top-0 z-10">
                 <div className="flex items-center gap-2">
                     <CheckSquare className="w-8 h-8 text-blue-500" />
-                    <h1 className="text-2xl font-bold tracking-tight">G01 AI TASK MANAGER</h1>
+                    <h1 className="text-2xl font-bold tracking-tight">TASK MANAGER</h1>
                 </div>
                 <nav className="flex gap-4">
                     <button 

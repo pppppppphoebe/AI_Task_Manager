@@ -54,6 +54,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete }) => {
                 <span className="bg-[#333] text-gray-300 px-2 py-1 rounded">
                     {task.workload}h
                 </span>
+                {task.is_daily && (
+                    <span className="bg-blue-900 text-blue-200 px-2 py-1 rounded font-semibold flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> Daily
+                    </span>
+                )}
                 {task.deadline && (
                     <span className="bg-[#333] text-gray-300 px-2 py-1 rounded flex items-center gap-1">
                         Due: {format(new Date(task.deadline), 'MMM d, p')}
