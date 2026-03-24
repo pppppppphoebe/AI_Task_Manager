@@ -36,13 +36,43 @@ def get_tasks(
         query = query.filter(Task.priority == priority)
     return query.all()
 
-@app.post("/tasks", response_model=TaskSchema)
+@app.post("/tasks", response_model=List[TaskSchema])
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    db_task = Task(**task.model_dump())
-    db.add(db_task)
-    db.commit()
-    db.refresh(db_task)
-    return db_task
+    # If it's a daily task and we have a deadline, create multiple tasks
+    if task.is_daily and task.deadline:
+        now = datetime.datetime.now()
+        # Keep only the date part of the deadline
+        deadline_date = task.deadline.date()
+        current_date = now.date()
+        
+        created_tasks = []
+        
+        while current_date <= deadline_date:
+            # Create a new task for this day
+            new_task_data = task.model_dump()
+            
+            # Update title to include date and set deadline to that day
+            # (Keeping time if original had it, or just using current time on that day)
+            new_deadline = datetime.datetime.combine(current_date, task.deadline.time())
+            new_task_data['deadline'] = new_deadline
+            
+            db_task = Task(**new_task_data)
+            db.add(db_task)
+            created_tasks.append(db_task)
+            
+            current_date += datetime.timedelta(days=1)
+            
+        db.commit()
+        for t in created_tasks:
+            db.refresh(t)
+        return created_tasks
+    else:
+        # Standard single task creation
+        db_task = Task(**task.model_dump())
+        db.add(db_task)
+        db.commit()
+        db.refresh(db_task)
+        return [db_task]
 
 @app.put("/tasks/{task_id}", response_model=TaskSchema)
 def update_task(task_id: int, task_update: TaskUpdate, db: Session = Depends(get_db)):

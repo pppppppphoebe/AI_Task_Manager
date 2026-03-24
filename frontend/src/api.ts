@@ -13,7 +13,7 @@ export const getTasks = async (status?: Status, priority?: Priority) => {
 };
 
 export const createTask = async (task: TaskCreate) => {
-    const response = await api.post<Task>('/tasks', task);
+    const response = await api.post<Task[]>('/tasks', task);
     return response.data;
 };
 

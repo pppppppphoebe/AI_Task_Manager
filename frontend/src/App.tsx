@@ -4,11 +4,12 @@ import { getTasks, createTask, updateTask, deleteTask, getAISortedTasks, getAISu
 import TaskCard from './components/TaskCard';
 import TaskForm from './components/TaskForm';
 import Dashboard from './components/Dashboard';
-import { Layout, CheckSquare, BarChart3, Sparkles, Filter, Loader2 } from 'lucide-react';
+import CalendarView from './components/CalendarView';
+import { Layout, CheckSquare, BarChart3, Sparkles, Filter, Loader2, Calendar } from 'lucide-react';
 
 const App: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [view, setView] = useState<'tasks' | 'dashboard' | 'ai'>('tasks');
+    const [view, setView] = useState<'tasks' | 'dashboard' | 'ai' | 'calendar'>('tasks');
     const [isLoading, setIsLoading] = useState(false);
     const [aiSummary, setAiSummary] = useState<string>('');
     const [isAiLoading, setIsAiLoading] = useState(false);
@@ -111,6 +112,12 @@ const App: React.FC = () => {
                         <Layout className="w-4 h-4" /> Tasks
                     </button>
                     <button 
+                        onClick={() => setView('calendar')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'calendar' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <Calendar className="w-4 h-4" /> Calendar
+                    </button>
+                    <button 
                         onClick={() => setView('dashboard')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'dashboard' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
@@ -176,6 +183,10 @@ const App: React.FC = () => {
 
                 {view === 'dashboard' && (
                     <Dashboard tasks={tasks} />
+                )}
+
+                {view === 'calendar' && (
+                    <CalendarView tasks={tasks} />
                 )}
 
                 {view === 'ai' && (
