@@ -1,34 +1,60 @@
-# AI Task Management System
+# AI Task Management System (TaskFlow AI)
 
-A modern task manager with **DeepSeek AI** integration, featuring natural language parsing, intelligent sorting, and data visualization.
+A modern, intelligent task manager with **DeepSeek AI** and **Google Calendar** integration. It doesn't just list tasks—it acts as your **AI Project Manager** to schedule your day and track long-term progress.
 
-## Features
-- **Task Management (CRUD):** Full control over your task lifecycle.
-- **AI Quick Add (Parsing):** Create tasks using natural language. 
-  - *Optimization:* AI automatically generates concise titles (< 8 words) and moves extra context into the description.
-- **AI Priority Sort:** Optimize your schedule with AI recommendations based on deadlines, priority, and workload.
-- **AI Insights:** Get weekly performance summaries and productivity reports.
-- **Dashboard:** Visualize progress with Chart.js and manage workload distribution.
+## 🚀 Key Features
 
-## Tech Stack
-- **Frontend:** React 19, Vite, Tailwind CSS, Chart.js, Lucide-React
-  - *Note:* Standard enums have been replaced with `const` objects + `type` unions to comply with strict `erasableSyntaxOnly` TS rules.
-- **Backend:** FastAPI, PostgreSQL/SQLite, SQLAlchemy, Pydantic
-- **AI:** DeepSeek (Compatible with OpenAI SDK)
+### 1. AI Project Manager (Daily Scheduler)
+- **Dynamic Time Blocking:** AI breaks down large tasks into manageable daily time blocks based on your available working hours.
+- **Context-Aware Scheduling:** AI automatically avoids conflicts with your Google Calendar meetings and adjusts for holidays or special events (like birthdays).
+- **Quantifiable Feedback Loop:** Report actual progress after completing a block. AI recalculates remaining workloads to optimize tomorrow's schedule.
 
-## Setup Instructions
+### 2. Google Calendar Integration (One-Way Sync)
+- **Fixed Constraints:** Fetch your real-time meetings and events to serve as hard scheduling boundaries.
+- **Special Event Detection:** Birthdays and holidays are treated as "Life Context," prompting AI to suggest empathetic tasks (e.g., "Buy birthday gift").
 
-### Backend
-1. `cd backend`
-2. `pip install -r requirements.txt`
-3. Edit `.env` to include your `DEEPSEEK_API_KEY`.
-4. Run `uvicorn main:app --reload` (or `python main.py`)
+### 3. Advanced Visualization
+- **Modern Calendar View:** A high-end, color-coded monthly view showing Tasks, Google Events, and AI-scheduled blocks.
+- **Live Dashboard:** Real-time analytics on task distribution and workload by priority using Chart.js.
 
-### Frontend
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
+### 4. AI Quick Add
+- Natural language task creation. AI automatically extracts concise titles (< 8 words) and puts full context into the description.
 
-## File Structure
-- `backend/`: FastAPI application, models, and DeepSeek AI services.
-- `frontend/`: React application, components, and optimized TypeScript types.
+## 🛠️ Tech Stack
+- **Frontend:** React 19, TypeScript (Optimized), Tailwind CSS v4, Lucide-React, Chart.js.
+- **Backend:** FastAPI, PostgreSQL/SQLAlchemy, Pydantic v2.
+- **AI:** DeepSeek-V3 (OpenAI SDK Compatible).
+- **Auth:** Google OAuth 2.0.
+
+## 📦 Setup Instructions
+
+### 1. Google API Setup
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable **Google Calendar API**.
+3. Create OAuth 2.0 Credentials (Web Application).
+4. Add Redirect URI: `http://127.0.0.1:8000/auth/google/callback`.
+
+### 2. Environment Configuration
+Edit `backend/.env`:
+```env
+DEEPSEEK_API_KEY="your_key"
+GOOGLE_CLIENT_ID="your_id"
+GOOGLE_CLIENT_SECRET="your_secret"
+GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/auth/google/callback"
+DATABASE_URL="postgresql://user:pass@localhost:5432/db_name"
+```
+
+### 3. Launch
+**Backend:**
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```

@@ -1,58 +1,64 @@
-# AI 任務管理器 (AI Task Manager)
+# AI 任務管理系統 (TaskFlow AI)
 
-這是一個結合了 **FastAPI (Python)**、**React (TypeScript)** 以及 **DeepSeek AI** 的現代化任務管理應用程式。它不僅能管理日常待辦事項，還能透過 AI 自動分析自然語言、優化任務排序並生成每週進度總結。
+這是一個結合了 **DeepSeek AI** 與 **Google Calendar** 深度整合的現代化任務管理系統。它不僅僅是一個待辦清單，更是你的 **「AI 專案經理」**，負責幫你安排每日行程並追蹤長期進度。
 
 ## 🚀 核心功能
 
-### 1. 任務管理 (Task Management)
-*   **全功能 CRUD**：新增、讀取、更新、刪除任務。
-*   **狀態與優先級**：支援「待處理」、「進行中」、「已完成」狀態，以及「高、中、低」三種優先級。
-*   **工時預估**：為每個任務設定預計工時。
+### 1. AI 專案經理 (每日排程器)
+*   **動態時間阻斷 (Time Blocking)**：AI 會根據你今天可用的工作時數，自動將大型任務拆解為合理的每日執行區塊。
+*   **情境感知排程**：自動避開 Google 日曆中的固定會議，並根據節慶或生日調整排程壓力。
+*   **量化回報機制**：執行完畢後可回報進度，AI 會動態重新計算剩餘工時，優化明天的安排。
 
-### 2. AI 智慧功能 (AI Features)
-*   **AI Quick Add (自然語言解析)**：你可以直接輸入「這週五中午前要完成專案報告，優先度高」。
-    *   **優化**：AI 會自動生成 8 個字以內的精簡標題，並將其餘細節與原始意圖歸類至「描述」欄位。
-*   **智慧排序 (AI Priority Sort)**：一鍵呼叫 AI 專家，根據截止日期、優先級與工時，為你排出最有效率的執行順序。
-*   **每週總結 (AI Weekly Insights)**：AI 會分析你目前的所有任務，提供激勵人心的每週進度報告與逾期提醒。
+### 2. Google Calendar 深度整合 (單向同步)
+*   **硬性限制同步**：即時抓取你的會議與活動，確保 AI 安排的任務不會與現實行程衝突。
+*   **特殊事件偵測**：自動辨識全天事件（如生日、節日），激發 AI 產生貼心建議（如「買生日禮物」）。
 
-### 3. 數據視覺化 (Dashboard)
-*   **狀態分佈圖**：使用圓餅圖顯示任務完成比例。
-*   **工作量分析**：使用長條圖分析不同優先級的總預計工時，幫助你平衡壓力。
+### 3. 進階數據視覺化
+*   **現代化日曆視圖**：全新的美術翻修，以高質感的顏色與標籤區分「任務」、「Google 行程」與「AI 排程區塊」。
+*   **動態儀表板**：使用 Chart.js 即時分析任務狀態分佈與各優先級的工作量。
+
+### 4. AI 智慧快速新增
+*   支援自然語言輸入，AI 自動生成 8 個字以內的精簡標題，並將背景資訊歸類至描述欄位。
 
 ## 🛠️ 技術棧
+*   **前端 (Frontend)**: React 19, TypeScript, Tailwind CSS v4, Lucide-React, Chart.js.
+*   **後端 (Backend)**: FastAPI, PostgreSQL/SQLAlchemy, Pydantic v2.
+*   **人工智慧 (AI)**: DeepSeek-V3 (相容 OpenAI SDK).
+*   **認證 (Auth)**: Google OAuth 2.0.
 
-*   **後端 (Backend)**:
-    *   Framework: FastAPI
-    *   Database: PostgreSQL / SQLite (支援 SQLAlchemy ORM)
-    *   AI Integration: **DeepSeek** (使用 OpenAI SDK 相容介面)
-*   **前端 (Frontend)**:
-    *   Framework: React 19 + TypeScript
-    *   TypeScript: 已針對 `erasableSyntaxOnly` 優化，使用 `const` 物件與 `type` 聯集取代標準 Enum。
-    *   Styling: Tailwind CSS v4
-    *   Charts: Chart.js
-    *   Icons: Lucide React
+## 📦 安裝與設定
 
-## 📦 安裝與啟動
+### 1. Google API 設定
+1. 前往 [Google Cloud Console](https://console.cloud.google.com/)。
+2. 啟用 **Google Calendar API**。
+3. 建立 OAuth 2.0 用戶端 ID (網頁應用程式)。
+4. 設定重新導向 URI：`http://127.0.0.1:8000/auth/google/callback`。
 
-### 1. 資料庫與 AI 設定
-1. 安裝 PostgreSQL (或使用預設 SQLite)。
-2. 修改 `backend/.env` 中的 `DEEPSEEK_API_KEY` 與 `DATABASE_URL`。
+### 2. 環境變數配置
+編輯 `backend/.env`：
+```env
+DEEPSEEK_API_KEY="你的金鑰"
+GOOGLE_CLIENT_ID="你的 Google ID"
+GOOGLE_CLIENT_SECRET="你的 Google Secret"
+GOOGLE_REDIRECT_URI="http://127.0.0.1:8000/auth/google/callback"
+DATABASE_URL="postgresql://user:pass@localhost:5432/db_name"
+```
 
-### 2. 後端啟動
+### 3. 啟動專案
+**後端：**
 ```bash
 cd backend
 pip install -r requirements.txt
 python main.py
 ```
-後端將運行於：`http://localhost:8000`
 
-### 3. 前端啟動
+**前端：**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-前端將運行於：`http://localhost:5173`
+
 
 ## 📝 後續優化方向 (TODO)
 *   [ ] 支援 Google 帳號登入與 Google Calendar 同步。

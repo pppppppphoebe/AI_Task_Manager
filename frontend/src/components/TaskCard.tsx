@@ -106,8 +106,8 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onUpdate, onDelete }) => {
                 <span className={`${priorityColor[task.priority]} border px-2 py-0.5 rounded-md`}>
                     {task.priority}
                 </span>
-                <span className="bg-slate-50 text-slate-500 border border-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-                    {task.workload}h
+                <span className="bg-slate-50 text-slate-500 border border-slate-100 px-2 py-0.5 rounded-md flex items-center gap-1" title="Remaining / Total">
+                    {task.remaining_workload}h / {task.total_workload}h
                 </span>
                 {task.is_daily && (
                     <span className="bg-blue-600 text-white px-2 py-0.5 rounded-md flex items-center gap-1">

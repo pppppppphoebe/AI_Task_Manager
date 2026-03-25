@@ -1,26 +1,69 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { type Task, type TaskCreate } from './types';
-import { getTasks, createTask, updateTask, deleteTask, getAISortedTasks, getAISummary } from './api';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { type Task, type TaskCreate, type TimeBlock } from './types';
+import { getTasks, createTask, updateTask, deleteTask, getAISortedTasks, getAISummary, getTimeBlocks } from './api';
 import TaskCard from './components/TaskCard';
 import TaskForm from './components/TaskForm';
 import Dashboard from './components/Dashboard';
 import CalendarView from './components/CalendarView';
-import { Layout, CheckSquare, BarChart3, Sparkles, Filter, Loader2, Calendar } from 'lucide-react';
+import DailySchedule from './components/DailySchedule';
+import FeedbackModal from './components/FeedbackModal';
+import { Layout, CheckSquare, BarChart3, Sparkles, Filter, Loader2, Calendar, Clock } from 'lucide-react';
+import { generateDailySchedule, checkGoogleStatus, syncGoogleCalendar, getGoogleLoginUrl } from './api';
 
 const App: React.FC = () => {
     const [tasks, setTasks] = useState<Task[]>([]);
-    const [view, setView] = useState<'tasks' | 'dashboard' | 'ai' | 'calendar'>('tasks');
+    const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([]);
+    const [view, setView] = useState<'tasks' | 'dashboard' | 'ai' | 'calendar' | 'schedule'>('tasks');
     const [isLoading, setIsLoading] = useState(false);
     const [aiSummary, setAiSummary] = useState<string>('');
     const [isAiLoading, setIsAiLoading] = useState(false);
+    const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+    
+    // Daily Schedule State
+    const [activeBlock, setActiveBlock] = useState<TimeBlock | null>(null);
+
+    const checkGoogle = async () => {
+        try {
+            const status = await checkGoogleStatus();
+            setIsGoogleConnected(status.connected);
+        } catch (e) {
+            console.error("Google status check failed", e);
+        }
+    };
+
+    useEffect(() => {
+        checkGoogle();
+        
+        // Check for oauth success callback param
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('google_sync') === 'success') {
+            alert('Google Calendar Connected Successfully!');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            checkGoogle();
+        }
+    }, []);
+
+    const handleConnectGoogle = async () => {
+        try {
+            const data = await getGoogleLoginUrl();
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Failed to get Google login URL', error);
+            alert('Failed to connect to Google Auth service.');
+        }
+    };
 
     const fetchTasks = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await getTasks();
-            setTasks(data);
+            const [tasksData, blocksData] = await Promise.all([
+                getTasks(),
+                getTimeBlocks()
+            ]);
+            setTasks(tasksData);
+            setTimeBlocks(blocksData);
         } catch (error) {
-            console.error('Failed to fetch tasks', error);
+            console.error('Failed to fetch data', error);
         } finally {
             setIsLoading(false);
         }
@@ -95,6 +138,50 @@ const App: React.FC = () => {
         }
     };
 
+    const handleGenerateSchedule = async (hours: number) => {
+        setIsAiLoading(true);
+        try {
+            // First sync with Google Calendar to get latest context
+            if (isGoogleConnected) {
+                await syncGoogleCalendar();
+            }
+
+            // Get local current time string in format expected by backend (YYYY-MM-DD HH:MM:SS)
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(Date.now() - tzoffset)).toISOString().slice(0, 19).replace('T', ' ');
+            
+            await generateDailySchedule(hours, localISOTime);
+            fetchTasks(); 
+        } catch (error) {
+            console.error('Failed to generate schedule', error);
+            alert('Failed to generate schedule.');
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
+    const handleCompleteBlock = (block: TimeBlock) => {
+        setActiveBlock(block);
+    };
+
+    const handleSubmitFeedback = async (blockId: number, taskId: number | undefined, newRemaining: number) => {
+        if (taskId) {
+            await handleUpdateTask(taskId, { remaining_workload: newRemaining });
+        }
+        
+        // Refresh all data
+        fetchTasks();
+        setActiveBlock(null);
+    };
+
+    // Filter blocks for today specifically for the schedule view
+    const todayBlocksForView = useMemo(() => {
+        const todayDate = new Date();
+        const tzoffset = todayDate.getTimezoneOffset() * 60000;
+        const localISODate = (new Date(todayDate.getTime() - tzoffset)).toISOString().split('T')[0];
+        return timeBlocks.filter(b => b.date === localISODate);
+    }, [timeBlocks]);
+
     return (
         <div className="min-h-screen bg-[#f8fafc] text-slate-900 w-full font-sans">
             <header className="bg-white border-b border-slate-200 p-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
@@ -106,6 +193,14 @@ const App: React.FC = () => {
                 </div>
                 <nav className="flex gap-2">
                     <button 
+                        onClick={isGoogleConnected ? async () => { alert((await syncGoogleCalendar()).message); fetchTasks(); } : handleConnectGoogle}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all border ${isGoogleConnected ? 'border-emerald-200 text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'border-blue-200 text-blue-600 bg-white hover:bg-blue-50 shadow-sm'}`}
+                    >
+                        <Calendar className="w-4 h-4" /> 
+                        {isGoogleConnected ? 'Sync GCal' : 'Connect GCal'}
+                    </button>
+                    <div className="w-px h-8 bg-slate-200 mx-2 self-center"></div>
+                    <button 
                         onClick={() => setView('tasks')}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'tasks' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
@@ -116,6 +211,12 @@ const App: React.FC = () => {
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'calendar' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
                     >
                         <Calendar className="w-4 h-4" /> Calendar
+                    </button>
+                    <button 
+                        onClick={() => setView('schedule')}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'schedule' ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                    >
+                        <Clock className="w-4 h-4" /> Today
                     </button>
                     <button 
                         onClick={() => setView('dashboard')}
@@ -186,7 +287,19 @@ const App: React.FC = () => {
                 )}
 
                 {view === 'calendar' && (
-                    <CalendarView tasks={tasks} />
+                    <CalendarView 
+                        tasks={tasks} 
+                        timeBlocks={timeBlocks} 
+                    />
+                )}
+
+                {view === 'schedule' && (
+                    <DailySchedule 
+                        blocks={todayBlocksForView}
+                        onGenerate={handleGenerateSchedule}
+                        onCompleteBlock={handleCompleteBlock}
+                        isLoading={isAiLoading}
+                    />
                 )}
 
                 {view === 'ai' && (
@@ -218,6 +331,15 @@ const App: React.FC = () => {
                     </div>
                 )}
             </main>
+            
+            {activeBlock && (
+                <FeedbackModal 
+                    block={activeBlock}
+                    task={tasks.find(t => t.id === activeBlock.task_id)}
+                    onClose={() => setActiveBlock(null)}
+                    onSubmit={handleSubmitFeedback}
+                />
+            )}
         </div>
     );
 };

@@ -40,9 +40,9 @@ const Dashboard: React.FC<DashboardProps> = ({ tasks }) => {
             {
                 label: 'Total Workload (Hours)',
                 data: [
-                    tasks.filter(t => t.priority === 'Low').reduce((acc, t) => acc + t.workload, 0),
-                    tasks.filter(t => t.priority === 'Medium').reduce((acc, t) => acc + t.workload, 0),
-                    tasks.filter(t => t.priority === 'High').reduce((acc, t) => acc + t.workload, 0),
+                    tasks.filter(t => t.priority === 'Low').reduce((acc, t) => acc + t.total_workload, 0),
+                    tasks.filter(t => t.priority === 'Medium').reduce((acc, t) => acc + t.total_workload, 0),
+                    tasks.filter(t => t.priority === 'High').reduce((acc, t) => acc + t.total_workload, 0),
                 ],
                 backgroundColor: '#3b82f6', // blue-500
                 borderRadius: 8,

@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import json
 from schemas import AIParsedTask
 from models import Priority, Status
-from typing import List
+from typing import List, Dict, Any
 import datetime
 
 load_dotenv()
@@ -18,6 +18,32 @@ client = OpenAI(
 
 # 使用 DeepSeek 的模型 (deepseek-chat 或 deepseek-reasoner)
 AI_MODEL = "deepseek-chat"
+
+def get_daily_schedule(available_hours: float, current_time: str, fixed_blocks: List[Dict], flexible_tasks: List[Dict], all_day_events: List[str]) -> Dict[str, Any]:
+    try:
+        with open("prompts/daily_scheduler.md", "r", encoding="utf-8") as f:
+            prompt_template = f.read()
+            
+        prompt = prompt_template.replace("{{current_time}}", current_time)\
+                                .replace("{{available_hours}}", str(available_hours))\
+                                .replace("{{all_day_events_list}}", json.dumps(all_day_events, ensure_ascii=False))\
+                                .replace("{{fixed_blocks_json}}", json.dumps(fixed_blocks, ensure_ascii=False))\
+                                .replace("{{flexible_tasks_json}}", json.dumps(flexible_tasks, ensure_ascii=False))
+
+        response = client.chat.completions.create(
+            model=AI_MODEL,
+            messages=[
+                {"role": "system", "content": "You are an elite Project Manager outputting valid JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={ "type": "json_object" }
+        )
+        
+        content = response.choices[0].message.content
+        return json.loads(content)
+    except Exception as e:
+        print(f"ERROR in get_daily_schedule: {str(e)}")
+        raise e
 
 def parse_task_from_text(text: str) -> AIParsedTask:
     """Parse natural language text into a task object."""

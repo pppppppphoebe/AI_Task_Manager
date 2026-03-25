@@ -11,7 +11,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState<Priority>(Priority.MEDIUM);
-    const [workload, setWorkload] = useState(1);
+    const [totalWorkload, setTotalWorkload] = useState(1);
     const [deadline, setDeadline] = useState('');
     const [isDaily, setIsDaily] = useState(false);
     
@@ -24,7 +24,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             title,
             description,
             priority,
-            workload,
+            total_workload: totalWorkload,
+            remaining_workload: totalWorkload,
             deadline: deadline || undefined,
             status: Status.TODO,
             is_daily: isDaily
@@ -36,7 +37,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
         setTitle('');
         setDescription('');
         setPriority(Priority.MEDIUM);
-        setWorkload(1);
+        setTotalWorkload(1);
         setDeadline('');
         setIsDaily(false);
     };
@@ -49,7 +50,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
             setTitle(data.title);
             setDescription(data.description || '');
             setPriority(data.priority);
-            setWorkload(data.workload);
+            setTotalWorkload(data.total_workload || 1);
             setIsDaily(data.is_daily || false);
             if (data.deadline) {
                 setDeadline(new Date(data.deadline).toISOString().slice(0, 16));
@@ -124,11 +125,13 @@ const TaskForm: React.FC<TaskFormProps> = ({ onTaskCreated }) => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-slate-500 text-xs font-semibold mb-1.5 ml-1">Workload (h)</label>
+                        <label className="block text-slate-500 text-xs font-semibold mb-1.5 ml-1">Total Est. Hours</label>
                         <input 
                             type="number" 
-                            value={workload}
-                            onChange={(e) => setWorkload(parseInt(e.target.value))}
+                            step="0.5"
+                            min="0.5"
+                            value={totalWorkload}
+                            onChange={(e) => setTotalWorkload(Number(e.target.value))}
                             className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
                         />
                     </div>
